@@ -56,10 +56,34 @@ var checkHtmlFile = function(htmlfile, checksfile) {
     return out;
 };
 
+var cheerioUrlFile = function(htmlfile) {
+    return cheerio.load(htmlfile);
+};
+
+
+var checkUrlFile = function(htmlfile, checksfile) {
+    $ = cheerioUrlFile(htmlfile);
+    var checks = loadChecks(checksfile).sort();
+    var out = {};
+    for(var ii in checks) {
+        var present = $(checks[ii]).length > 0;
+        out[checks[ii]] = present;
+    }
+    return out;
+};
+
+
+
 var clone = function(fn) {
     // Workaround for commander.js issue.
     // http://stackoverflow.com/a/6772648
     return fn.bind({});
+};
+
+var response2console = function(result, response) {
+    var checkJson = checkUrlFile(result, program.checks);
+    var outJson = JSON.stringify(checkJson, null, 4);
+    console.log(outJson);
 };
 
 if(require.main == module) {
@@ -71,13 +95,14 @@ if(require.main == module) {
 		 
     var file = program.file;
     if(program.url != URLFILE_DEFAULT) {
-          console.log("URL: "+program.url);
-          file = "web.js";
-    } 
+          var rest = require('restler');
+          rest.get(program.url).on('complete', response2console);
+    } else{ 
 		
     var checkJson = checkHtmlFile(file, program.checks);
     var outJson = JSON.stringify(checkJson, null, 4);
     console.log(outJson);
+    }
 } else {
     exports.checkHtmlFile = checkHtmlFile;
 }
