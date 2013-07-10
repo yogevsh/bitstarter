@@ -60,7 +60,7 @@ var clone = function(fn) {
     // Workaround for commander.js issue.
     // http://stackoverflow.com/a/6772648
     return fn.bind({});
-}
+};
 
 if(require.main == module) {
     program
